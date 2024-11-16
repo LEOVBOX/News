@@ -58,26 +58,27 @@ class NewsViewController: UIViewController, UIScrollViewDelegate {
     lazy var dateView: UILabel = {
         let label = UILabel()
         label.textColor = .lightGray
-        label.font = UIFont.systemFont(ofSize: 14)
+        label.font = UIFont.systemFont(ofSize: 16)
         return label
     }()
     
     lazy var authorView: UILabel = {
         let label = UILabel()
         //label.backgroundColor = .brown
-        label.layer.cornerRadius = 8
-        label.font = UIFont.systemFont(ofSize: 14)
+        label.font = UIFont.systemFont(ofSize: 16)
         label.layer.masksToBounds = true
         //label.textColor = .lightGray
         return label
     }()
     
-    lazy var contentTextView: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.layer.masksToBounds = true
-        label.numberOfLines = 0
-        return label
+    lazy var contentTextView: UITextView = {
+        let view = UITextView()
+        view.backgroundColor = .clear
+        view.font = UIFont.systemFont(ofSize: 16)
+        view.isEditable = false
+        view.isScrollEnabled = false
+        view.layer.masksToBounds = true
+        return view
     }()
     
     lazy var contentView: UIView = {
@@ -135,7 +136,7 @@ class NewsViewController: UIViewController, UIScrollViewDelegate {
         }
         
         if let author = viewModel.author {
-            authorView.text = author
+            authorView.text = "Author: " + author
         }
         
         if let content = viewModel.content {

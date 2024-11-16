@@ -12,8 +12,14 @@ class NewsListViewController: UIViewController {
     private let viewModel = NewsListViewModel()
     private var cancellables = Set<AnyCancellable>()
     
+    private lazy var searchFieldView: SearchFieldView = {
+        let view = SearchFieldView()
+        return view
+    }()
+    
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
+        tableView.backgroundColor = .white
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(NewsTableViewCell.self, forCellReuseIdentifier: String(describing: NewsTableViewCell.self))
@@ -44,11 +50,11 @@ class NewsListViewController: UIViewController {
     
     // Подписка на изменения в строке поиска
     private func bindSearchFieldPublisher() {
-       guard let searchFieldCell = tableView.visibleCells.compactMap({ $0 as? SearchFieldTableViewCell }).first else {
-           return
-       }
+//       guard let searchFieldCell = tableView.visibleCells.compactMap({ $0 as? SearchFieldTableViewCell }).first else {
+//           return
+//       }
 
-       searchFieldCell.textPublisher
+        searchFieldView.textPublisher
            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main) // Задержка 300 мс
            .filter { $0.count >= 3 } // Введено более 3х символов
            .removeDuplicates() // Исключение повторяющихся значений
@@ -56,19 +62,33 @@ class NewsListViewController: UIViewController {
                self?.viewModel.updateSearchQuery(text)
            }
            .store(in: &cancellables)
-   }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    }
+    
+    func setupUI() {
         view.backgroundColor = .white
         self.navigationItem.title = "Новости"
+        
+        view.addSubview(searchFieldView)
+        searchFieldView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            searchFieldView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchFieldView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
+            searchFieldView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
+        ])
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        tableView.topAnchor.constraint(equalTo: searchFieldView.bottomAnchor).isActive = true
         tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         tableView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor).isActive = true
         tableView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor).isActive = true
         tableView.reloadData()
+        
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUI()
+        searchFieldView.viewModel = viewModel.searchFieldViewModel
         bindSearchFieldPublisher()
         bindViewModel()
     }
@@ -80,6 +100,7 @@ extension NewsListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         viewModel.cellsViewModels.count
     }
+    
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let viewModel = self.viewModel.cellsViewModels[indexPath.row]
@@ -113,7 +134,10 @@ extension NewsListViewController: UITableViewDelegate, UITableViewDataSource {
             if offsetY > contentHeight - frameHeight - 100 { // Подгружаем за 100 пикселей до конца
                 viewModel.loadMoreMessages()
             }
-        }
+    }
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        view.endEditing(true)
+    }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)

@@ -100,6 +100,7 @@ class NewsTableViewCell: UITableViewCell {
     }
     
     private func setupUI() {
+        contentView.backgroundColor = .white
         contentView.addSubview(background)
         background.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

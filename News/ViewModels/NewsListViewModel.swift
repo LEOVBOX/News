@@ -33,11 +33,6 @@ class NewsListViewModel {
 
     init(apiService: APIServiceProtocol = APIService()) {
         self.apiService = apiService
-
-        // Инициализация с ячейкой поля ввода
-        cellsViewModels = [
-            TableViewModel(type: .searchField(searchFieldViewModel))
-        ]
         
         guard let queryPublisher else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
@@ -47,6 +42,7 @@ class NewsListViewModel {
         }
         
     }
+
     
     func loadMoreMessages() {
        guard !isLoading else { return }
@@ -62,16 +58,7 @@ class NewsListViewModel {
                    print("Error fetching messages: \(error)")
                }
            }, receiveValue: { [weak self] response in
-               guard let articles = response.articles else { return }
-               let newsCells = articles.map {
-                   TableViewModel(type: .news(.init(
-                       author: $0.author,
-                       title: $0.title,
-                       publishedAt: $0.publishedAt,
-                       content: $0.content
-                   )))
-               }
-               self?.cellsViewModels.append(contentsOf: newsCells)
+               self?.cellsViewModels.append(contentsOf: self?.handleResponse(response) ?? [])
            })
            .store(in: &cancellables)
        }
@@ -103,31 +90,32 @@ class NewsListViewModel {
                     break
                 }
             }, receiveValue: { [weak self] response in
-                self?.handleResponse(response)
+                self?.cellsViewModels = self?.handleResponse(response) ?? []
             })
             .store(in: &cancellables)
     }
     
-    private func addCells(newsCells: [TableViewModel]) {
-        self.cellsViewModels.append(contentsOf: newsCells)
-    }
-    
 
-    private func handleResponse(_ response: Response) {
+    private func handleResponse(_ response: Response) -> [TableViewModel] {
         guard response.status == "ok", let articles = response.articles else {
             errorMessage = "Не удалось загрузить статьи или произошла ошибка"
-            return
+            return []
         }
 
         // Проверяем, сколько статей мы получили
         print("Получено \(response.articles?.count ?? 0) статей.")
         
         let newsCells = response.articles?.compactMap { article in
-            TableViewModel(type: .news(.init(
+            // Проверяем условие
+            guard article.title != "[Removed]" else { return nil }
+            
+            // Создаем новый элемент
+            return TableViewModel(type: .news(.init(
                 author: article.author ?? "Неизвестный автор",
                 title: article.title ?? "Без заголовка",
-                publishedAt: article.publishedAt ?? "Дата неизвестна",
-                content: article.content ?? article.description ?? "Описание отсутствует"
+                publishedAt: article.publishedAt?.replacingOccurrences(of: "T", with: " ")
+                    .replacingOccurrences(of: "Z", with: " ") ?? "Дата неизвестна",
+                content: article.content
             )))
         } ?? []
         
@@ -135,9 +123,10 @@ class NewsListViewModel {
         print("Создано ячеек: \(newsCells.count)")
 
         // Обновляем `cellsViewModels`, сохраняя поле поиска
-        cellsViewModels = [
-            cellsViewModels.first
-        ].compactMap { $0 } + newsCells
+//        cellsViewModels = [
+//            cellsViewModels.first
+//        ].compactMap { $0 } + newsCells
+        return newsCells as? [TableViewModel] ?? []
 
     }
 

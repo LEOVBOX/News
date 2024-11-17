@@ -9,22 +9,48 @@ import Foundation
 import Combine
 
 class NewsListViewModel {
-    let API_KEY = "aa6975ae67014a4d927b0e80c5c9b7bc"
+    private let API_KEY = "3ababd366bb64c369163a4fc607445e0"
+    private let pageSize = 20
+    private let sortByPublishedAtQuery = "&sortBy=publishedAt"
+    private let sortByPopularityQuery = "&sortBy=popularity"
+    
     // Опубликованные свойства для привязки к View
     @Published var cellsViewModels: [TableViewModel] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     private var lastQuery = ""
+    var sortByPublishedAt = true {
+        didSet {
+            updateSearchQuery(lastQuery)
+        }
+    }
+    
     private var currentPage: Int {
         self.cellsViewModels.count / pageSize
     }
-    private let pageSize = 20
     
-
+    private var currentSortQuery: String {
+        if sortByPublishedAt {
+            sortByPublishedAtQuery
+        }
+        else {
+            sortByPopularityQuery
+        }
+    }
+    
     // Поле поиска как отдельная ViewModel
     lazy var searchFieldViewModel: TableViewModel.ViewModelType.SearchField = {
         TableViewModel.ViewModelType.SearchField(text: nil)
     }()
+    
+    lazy var dateCheckboxViewModel: TableViewModel.ViewModelType.Checkbox = {
+        TableViewModel.ViewModelType.Checkbox(isChecked: true, label: "Сортировать по дате выхода")
+    }()
+    
+    lazy var popularityCheckboxViewModel: TableViewModel.ViewModelType.Checkbox = {
+        TableViewModel.ViewModelType.Checkbox(isChecked: false, label: "Сортировать по популярности")
+    }()
+
     
     var queryPublisher: AnyPublisher<String, Never>?
 
@@ -45,12 +71,17 @@ class NewsListViewModel {
 
     
     func loadMoreMessages() {
-       guard !isLoading else { return }
-       isLoading = true
+        guard !isLoading else { return }
+        isLoading = true
 
-       let url = URL(string: "https://newsapi.org/v2/everything?q=\(lastQuery)&pageSize=\(pageSize)&page=\(currentPage)&apiKey=\(API_KEY)")!
+        let urlString = "https://newsapi.org/v2/everything?q=\(lastQuery)\(currentSortQuery)&pageSize=\(pageSize)&page=\(currentPage)&apiKey=\(API_KEY)"
 
-       apiService.fetchResponse(from: url)
+        guard let url = URL(string: urlString) else {
+            errorMessage = "Некорректный URL"
+            return
+        }
+        
+        apiService.fetchResponse(from: url)
            .receive(on: DispatchQueue.main)
            .sink(receiveCompletion: { [weak self] completion in
                self?.isLoading = false
@@ -61,7 +92,7 @@ class NewsListViewModel {
                self?.cellsViewModels.append(contentsOf: self?.handleResponse(response) ?? [])
            })
            .store(in: &cancellables)
-       }
+    }
 
     // Метод для обработки изменений в поле поиска
     func updateSearchQuery(_ query: String?) {
@@ -69,7 +100,7 @@ class NewsListViewModel {
         
         lastQuery = query
         
-        let urlString = "https://newsapi.org/v2/everything?q=\(query)&pageSize=\(pageSize)&apiKey=\(API_KEY)"
+        let urlString = "https://newsapi.org/v2/everything?q=\(query)\(currentSortQuery)&pageSize=\(pageSize)&apiKey=\(API_KEY)"
         guard let url = URL(string: urlString) else {
             errorMessage = "Некорректный URL"
             return
@@ -106,28 +137,20 @@ class NewsListViewModel {
         print("Получено \(response.articles?.count ?? 0) статей.")
         
         let newsCells = response.articles?.compactMap { article in
-            // Проверяем условие
             guard article.title != "[Removed]" else { return nil }
             
-            // Создаем новый элемент
             return TableViewModel(type: .news(.init(
                 author: article.author ?? "Неизвестный автор",
                 title: article.title ?? "Без заголовка",
-                publishedAt: article.publishedAt?.replacingOccurrences(of: "T", with: " ")
-                    .replacingOccurrences(of: "Z", with: " ") ?? "Дата неизвестна",
+                publishedAt: article.publishedAt?.replacingOccurrences(of: "T", with: "\n")
+                    .replacingOccurrences(of: "Z", with: " ").replacingOccurrences(of: "-", with: " ") ?? "Дата неизвестна",
                 content: article.content
             )))
         } ?? []
         
-        // Проверяем, сколько ячеек мы создали
         print("Создано ячеек: \(newsCells.count)")
-
-        // Обновляем `cellsViewModels`, сохраняя поле поиска
-//        cellsViewModels = [
-//            cellsViewModels.first
-//        ].compactMap { $0 } + newsCells
+        
         return newsCells as? [TableViewModel] ?? []
-
     }
 
 }

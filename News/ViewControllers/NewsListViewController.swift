@@ -13,8 +13,15 @@ class NewsListViewController: UIViewController {
     private var cancellables = Set<AnyCancellable>()
     
     private lazy var searchFieldView: SearchFieldView = {
-        let view = SearchFieldView()
-        return view
+        return SearchFieldView()
+    }()
+    
+    private lazy var dateSortCheckbox: CheckboxView = {
+        return CheckboxView()
+    }()
+    
+    private lazy var popularitySortCheckbox: CheckboxView = {
+        return CheckboxView()
     }()
     
     private lazy var tableView: UITableView = {
@@ -50,10 +57,6 @@ class NewsListViewController: UIViewController {
     
     // Подписка на изменения в строке поиска
     private func bindSearchFieldPublisher() {
-//       guard let searchFieldCell = tableView.visibleCells.compactMap({ $0 as? SearchFieldTableViewCell }).first else {
-//           return
-//       }
-
         searchFieldView.textPublisher
            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main) // Задержка 300 мс
            .filter { $0.count >= 3 } // Введено более 3х символов
@@ -62,6 +65,24 @@ class NewsListViewController: UIViewController {
                self?.viewModel.updateSearchQuery(text)
            }
            .store(in: &cancellables)
+    }
+    
+    private func bindDateCheckboxPublisher() {
+        dateSortCheckbox.statePublisher
+            .removeDuplicates()
+            .sink { [weak self] isDateSorting in
+                self?.popularitySortCheckbox.isChecked = !isDateSorting
+                self?.viewModel.sortByPublishedAt = isDateSorting
+            }.store(in: &cancellables)
+    }
+    
+    private func bindPopularityCheckboxPublisher() {
+        popularitySortCheckbox.statePublisher
+            .removeDuplicates()
+            .sink { [weak self] isPopularitySorting in
+                self?.dateSortCheckbox.isChecked = !isPopularitySorting
+                self?.viewModel.sortByPublishedAt = !isPopularitySorting
+            }.store(in: &cancellables)
     }
     
     func setupUI() {
@@ -75,9 +96,26 @@ class NewsListViewController: UIViewController {
             searchFieldView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
             searchFieldView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
         ])
+        
+        view.addSubview(dateSortCheckbox)
+        dateSortCheckbox.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            dateSortCheckbox.topAnchor.constraint(equalTo: searchFieldView.bottomAnchor),
+            dateSortCheckbox.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
+            dateSortCheckbox.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
+        ])
+        
+        view.addSubview(popularitySortCheckbox)
+        popularitySortCheckbox.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            popularitySortCheckbox.topAnchor.constraint(equalTo: dateSortCheckbox.bottomAnchor),
+            popularitySortCheckbox.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
+            popularitySortCheckbox.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
+        ])
+        
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.topAnchor.constraint(equalTo: searchFieldView.bottomAnchor).isActive = true
+        tableView.topAnchor.constraint(equalTo: popularitySortCheckbox.bottomAnchor).isActive = true
         tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         tableView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor).isActive = true
         tableView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor).isActive = true
@@ -89,7 +127,11 @@ class NewsListViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         searchFieldView.viewModel = viewModel.searchFieldViewModel
+        dateSortCheckbox.viewModel = viewModel.dateCheckboxViewModel
+        popularitySortCheckbox.viewModel = viewModel.popularityCheckboxViewModel
         bindSearchFieldPublisher()
+        bindDateCheckboxPublisher()
+        bindPopularityCheckboxPublisher()
         bindViewModel()
     }
     

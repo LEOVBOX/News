@@ -36,7 +36,7 @@ class NewsTableViewCell: UITableViewCell {
         //label.backgroundColor = .blue
         label.layer.cornerRadius = 8
         label.font = UIFont.systemFont(ofSize: 12)
-        //label.layer.masksToBounds = true
+        label.numberOfLines = 2
         return label
     }()
 
@@ -119,15 +119,6 @@ class NewsTableViewCell: UITableViewCell {
             titleView.leftAnchor.constraint(equalTo: background.leftAnchor, constant: TitleViewConstraints.leftAnchor.value)
         ])
         
-//        background.addSubview(authorView)
-//        authorView.translatesAutoresizingMaskIntoConstraints = false
-//        NSLayoutConstraint.activate([
-//            authorView.topAnchor.constraint(equalTo: titleView.bottomAnchor, constant: 4),
-//            authorView.rightAnchor.constraint(equalTo: background.rightAnchor, constant: -4),
-//            authorView.leftAnchor.constraint(equalTo: background.leftAnchor, constant: 4),
-//            
-//            
-//        ])
         
         background.addSubview(dateView)
         dateView.translatesAutoresizingMaskIntoConstraints = false
@@ -137,17 +128,7 @@ class NewsTableViewCell: UITableViewCell {
             dateView.leftAnchor.constraint(equalTo: background.leftAnchor, constant: 4),
             dateView.bottomAnchor.constraint(equalTo: background.bottomAnchor, constant: -4)
         ])
-        
-//        background.addSubview(contentTextView)
-//        contentTextView.translatesAutoresizingMaskIntoConstraints = false
-//        NSLayoutConstraint.activate([
-//            contentTextView.bottomAnchor.constraint(equalTo: background.bottomAnchor, constant: -4),
-//            contentTextView.topAnchor.constraint(equalTo: dateView.bottomAnchor, constant: 4),
-//            contentTextView.leftAnchor.constraint(equalTo: background.leftAnchor, constant: 4),
-//            contentTextView.rightAnchor.constraint(equalTo: background.rightAnchor, constant: -4)
-//        ])
-        
-        //contentView.addSubview(<#T##view: UIView##UIView#>)
+    
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

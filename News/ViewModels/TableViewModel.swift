@@ -23,8 +23,14 @@ struct TableViewModel {
             var textPublisher: AnyPublisher<String, Never>?
         }
         
+        struct Checkbox {
+            var isChecked: Bool
+            var label: String?
+        }
+        
         case news(News)
         case searchField(SearchField)
+        case checkbox(Checkbox)
     }
     
     var type: ViewModelType

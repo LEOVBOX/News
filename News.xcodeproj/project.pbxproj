@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B37FE4CB2CE8BF3C0057BD49 /* SearchFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37FE4CA2CE8BF3C0057BD49 /* SearchFieldView.swift */; };
+		B37FE4CD2CE9F2630057BD49 /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37FE4CC2CE9F2630057BD49 /* CheckboxView.swift */; };
 		B3B5F36D2CE7E90900DA42E5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B5F36C2CE7E90900DA42E5 /* AppDelegate.swift */; };
 		B3B5F36F2CE7E90900DA42E5 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B5F36E2CE7E90900DA42E5 /* SceneDelegate.swift */; };
 		B3B5F3712CE7E90900DA42E5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B5F3702CE7E90900DA42E5 /* ViewController.swift */; };
@@ -28,6 +29,7 @@
 
 /* Begin PBXFileReference section */
 		B37FE4CA2CE8BF3C0057BD49 /* SearchFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchFieldView.swift; sourceTree = "<group>"; };
+		B37FE4CC2CE9F2630057BD49 /* CheckboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxView.swift; sourceTree = "<group>"; };
 		B3B5F3692CE7E90900DA42E5 /* News.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = News.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3B5F36C2CE7E90900DA42E5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B3B5F36E2CE7E90900DA42E5 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -127,6 +129,7 @@
 				B3B5F3902CE7F20000DA42E5 /* NewsTableViewCell.swift */,
 				B3B5F3972CE8041C00DA42E5 /* SearchFieldTableViewCell.swift */,
 				B37FE4CA2CE8BF3C0057BD49 /* SearchFieldView.swift */,
+				B37FE4CC2CE9F2630057BD49 /* CheckboxView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -218,6 +221,7 @@
 				B3B5F38E2CE7EDB400DA42E5 /* Response.swift in Sources */,
 				B37FE4CB2CE8BF3C0057BD49 /* SearchFieldView.swift in Sources */,
 				B3B5F36D2CE7E90900DA42E5 /* AppDelegate.swift in Sources */,
+				B37FE4CD2CE9F2630057BD49 /* CheckboxView.swift in Sources */,
 				B3B5F3872CE7EA2B00DA42E5 /* NewsViewController.swift in Sources */,
 				B3B5F3932CE7F77400DA42E5 /* APIServiceProtocol.swift in Sources */,
 				B3B5F36F2CE7E90900DA42E5 /* SceneDelegate.swift in Sources */,
